@@ -91,12 +91,15 @@ def single_search():
     preds = model(batch)
     preds = preds.cpu().detach().numpy()
     matching = []
+    if (len(preds) <= 0):
+        return flask.jsonify({'status': 202, 'result': 'No Matchings'})
     for i in range(len(preds)):
         matching.append((matchings[i].split('/')[-1].split('.')[0], preds[i][1]))
     matching.sort(key=lambda x:x[1],reverse=True)
     best_name, best_score = matching[0]
     best_image = Image.open(f'./saves/{other_gen}/{best_name}.png')
     best_image_str = base64.b64encode(best_image.tobytes()).decode()
-    return flask.jsonify({'status': 200, 'result': best_score, 'name': best_image, 'img': best_image_str})
+    best_score = "%.4f"%(best_score)
+    return flask.jsonify({'status': 200, 'result': str(best_score), 'name': best_image, 'img': best_image_str})
     
 server.run(port=8888, debug=True)
